@@ -24,8 +24,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include <stdio.h>
-#include <string.h>
 #include <stdbool.h>
 
 /* USER CODE END Includes */
@@ -544,26 +542,18 @@ void Start_4_QueueLEDPingTask(void const * argument)
 {
   /* USER CODE BEGIN Start_4_QueueLEDPingTask */
 
-	bool pingRxFlag = pdTRUE;
+	bool pingRxFlag = pdFALSE;
 	bool pongTxFlag = pdTRUE;
 
-	BaseType_t rxResults;
+	// Initial "serve"
+	xQueueSend(PongRxQueueHandle, &pongTxFlag, portMAX_DELAY);
 
   /* Infinite loop */
   for(;;)
   {
-	  char* pingMsg = "PING\n";
-	  HAL_UART_Transmit(&huart1, (uint8_t*) pingMsg, strlen(pingMsg), 1000);
-
 	  if (uxQueueMessagesWaiting(PingRxQueueHandle) != 0)
 	  {
-		  rxResults = xQueueReceive(PingRxQueueHandle, &pingRxFlag, portMAX_DELAY);
-
-		  if (rxResults == pdFAIL)
-		  {
-			  char* errorMsg = "Failed to RX from Pong queue\n";
-			  HAL_UART_Transmit(&huart1, (uint8_t*) errorMsg, strlen(errorMsg), 1000);
-		  }
+		  xQueueReceive(PingRxQueueHandle, &pingRxFlag, portMAX_DELAY);
 
 		  if (pingRxFlag == pdTRUE)
 		  {
@@ -598,23 +588,12 @@ void Start_4_QueueLEDPongTask(void const * argument)
 	bool pongRxFlag = pdFALSE;
 	bool pingTxFlag = pdFALSE;
 
-	BaseType_t rxResults;
-
   /* Infinite loop */
   for(;;)
   {
-	  char* pongMsg = "PONG\n";
-	  HAL_UART_Transmit(&huart1, (uint8_t*) pongMsg, strlen(pongMsg), 1000);
-
 	  if (uxQueueMessagesWaiting(PongRxQueueHandle) != 0)
 	  {
-		  rxResults = xQueueReceive(PongRxQueueHandle, &pongRxFlag, portMAX_DELAY);
-
-		  if (rxResults == pdFAIL)
-		  {
-			  char* errorMsg = "Failed to RX from Ping queue\n";
-			  HAL_UART_Transmit(&huart1, (uint8_t*) errorMsg, strlen(errorMsg), 1000);
-		  }
+		  xQueueReceive(PongRxQueueHandle, &pongRxFlag, portMAX_DELAY);
 
 		  if (pongRxFlag == pdTRUE)
 		  {
