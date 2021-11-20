@@ -529,10 +529,10 @@ void StartLEDTask1(void const * argument)
 	  osDelay(5000);
 
 	  // Get the counter value into the local copy, set it to 0
-	  //taskENTER_CRITICAL();
+	  taskENTER_CRITICAL();
 	  task1CounterRead = counterValue;
 	  counterValue = 0;
-	  //taskEXIT_CRITICAL();
+	  taskEXIT_CRITICAL();
 
 	  char buffer[100];
 	  snprintf(buffer, sizeof(buffer), "task1CounterRead: %lu\n", task1CounterRead);
@@ -541,19 +541,21 @@ void StartLEDTask1(void const * argument)
 	  // For non-zero count values, grab the mutex, toggle the LED for each count, then release the mutex
 	  if (task1CounterRead > 0)
 	  {
-		  if (xSemaphoreTake(LEDMutexHandle, pdMS_TO_TICKS(100)) == pdTRUE)
+		  //if (xSemaphoreTake(LEDMutexHandle, pdMS_TO_TICKS(1000)) == pdTRUE)
+		  if (osMutexWait(LEDMutexHandle, 0))
 		  {
 			  for (uint32_t i = 0; i < task1CounterRead; i++)
 			  {
 				  // Add in printf as a proof-of-function
-				  char* toggleMsg = "Task 1 toggle...\n";
-				  HAL_UART_Transmit(&huart1, (uint8_t*) toggleMsg, strlen(toggleMsg), 1000);
+				  //char* toggleMsg = "Task 1 toggle...\n";
+				  //HAL_UART_Transmit(&huart1, (uint8_t*) toggleMsg, strlen(toggleMsg), 1000);
 
 				  HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
 				  osDelay(500);
 			  }
 
-			  xSemaphoreGive(LEDMutexHandle);
+			  //xSemaphoreGive(LEDMutexHandle);
+			  osMutexRelease(LEDMutexHandle);
 		  }
 		  else
 		  {
@@ -561,7 +563,6 @@ void StartLEDTask1(void const * argument)
 			  char* errorMsg = "Task 1 couldn't grab the mutex!\n";
 			  HAL_UART_Transmit(&huart1, (uint8_t*) errorMsg, strlen(errorMsg), 1000);
 		  }
-
 	  }
   }
   /* USER CODE END 5 */
@@ -588,10 +589,10 @@ void StartLEDTask2(void const * argument)
 	  osDelay(5000);
 
 	  // Get the counter value into the local copy, set it to 0
-	  //taskENTER_CRITICAL();
+	  taskENTER_CRITICAL();
 	  task2CounterRead = counterValue;
 	  counterValue = 0;
-	  //taskEXIT_CRITICAL();
+	  taskEXIT_CRITICAL();
 
 	  char buffer[100];
 	  snprintf(buffer, sizeof(buffer), "task2CounterRead: %lu\n", task2CounterRead);
@@ -600,19 +601,21 @@ void StartLEDTask2(void const * argument)
 	  // For non-zero count values, grab the mutex, toggle the LED for each count, then release the mutex
 	  if (task2CounterRead > 0)
 	  {
-		  if (xSemaphoreTake(LEDMutexHandle, pdMS_TO_TICKS(100)) == pdTRUE)
+		  //if (xSemaphoreTake(LEDMutexHandle, pdMS_TO_TICKS(1000)) == pdTRUE)
+		  if (osMutexWait(LEDMutexHandle, osWaitForever))
 		  {
 			  for (uint32_t i = 0; i < task2CounterRead; i++)
 			  {
 				  // Add in printf as a proof-of-function
-				  char* toggleMsg = "Task 2 toggle...\n";
-				  HAL_UART_Transmit(&huart1, (uint8_t*) toggleMsg, strlen(toggleMsg), 1000);
+				  //char* toggleMsg = "Task 2 toggle...\n";
+				  //HAL_UART_Transmit(&huart1, (uint8_t*) toggleMsg, strlen(toggleMsg), 1000);
 
 				  HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
 				  osDelay(1000);
 			  }
 
-			  xSemaphoreGive(LEDMutexHandle);
+			  //xSemaphoreGive(LEDMutexHandle);
+			  osMutexRelease(LEDMutexHandle);
 		  }
 		  else
 		  {
@@ -620,7 +623,6 @@ void StartLEDTask2(void const * argument)
 			  char* errorMsg = "Task 2 couldn't grab the mutex!\n";
 			  HAL_UART_Transmit(&huart1, (uint8_t*) errorMsg, strlen(errorMsg), 1000);
 		  }
-		  ;
 	  }
   }
   /* USER CODE END StartLEDTask2 */
